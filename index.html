@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#FAF8F5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Treino</title>
+<style>
+:root{
+  --paper:#FAF8F5; --band:#F2EEE8; --ink:#2B2926; --mute:#8C877E;
+  --hair:#E3DED5; --moss:#6B7F73; --warn:#A8734F;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+  font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
+body{padding-bottom:env(safe-area-inset-bottom)}
+.wrap{max-width:640px;margin:0 auto;padding:0 18px}
+
+header{padding:26px 0 0}
+.kicker{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--mute)}
+h1{font-size:30px;font-weight:300;letter-spacing:-.028em;margin:6px 0 2px}
+.meta{font-size:12.5px;color:var(--mute)}
+
+nav{position:sticky;top:0;z-index:20;background:var(--paper);
+  border-bottom:1px solid var(--hair);margin-top:18px}
+nav .wrap{display:flex;gap:20px;padding-top:12px;overflow-x:auto;
+  scrollbar-width:none;-ms-overflow-style:none}
+nav .wrap::-webkit-scrollbar{display:none}
+nav button{appearance:none;background:none;border:0;padding:0 0 11px;cursor:pointer;
+  font-family:var(--sans);font-size:13px;color:var(--mute);white-space:nowrap;
+  border-bottom:1.5px solid transparent;margin-bottom:-1px;flex:none}
+nav button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--ink)}
+nav button:focus-visible{outline:2px solid var(--moss);outline-offset:3px}
+
+.item{border-bottom:1px solid var(--hair)}
+.head{display:flex;align-items:center;gap:15px;padding:15px 0;cursor:pointer;
+  width:100%;background:none;border:0;text-align:left;font-family:inherit;color:inherit}
+.head:focus-visible{outline:2px solid var(--moss);outline-offset:2px}
+.glyph{width:34px;height:34px;flex:none;color:var(--ink)}
+.glyph svg{width:100%;height:100%;display:block}
+.nm{flex:1;min-width:0}
+.nm b{display:block;font-size:14.5px;font-weight:500;letter-spacing:-.008em}
+.nm span{display:block;font-family:var(--mono);font-size:11px;color:var(--mute);margin-top:3px}
+.tick{font-family:var(--mono);font-size:11px;color:var(--mute);flex:none}
+.tick.done{color:var(--moss)}
+
+.body{display:none;padding:2px 0 20px}
+.item.open .body{display:block}
+
+.swap{display:flex;border:1px solid var(--hair);border-radius:3px;overflow:hidden;margin:0 0 14px}
+.swap button{flex:1;appearance:none;background:var(--paper);border:0;padding:9px 6px;
+  font-family:var(--mono);font-size:10px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--mute);cursor:pointer}
+.swap button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+.swap button:focus-visible{outline:2px solid var(--moss);outline-offset:-3px}
+
+.vnome{font-size:14.5px;font-weight:500;margin:0 0 7px}
+.exec{font-size:13.5px;color:#4A4741;margin:0 0 12px}
+.exec strong{color:var(--warn);font-weight:600}
+.ref{display:inline-block;font-size:12px;color:var(--moss);text-decoration:none;
+  border-bottom:1px solid var(--hair);padding-bottom:1px;margin-bottom:16px}
+
+table{width:100%;border-collapse:collapse}
+th{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--mute);font-weight:400;text-align:left;padding:0 0 7px}
+th.n,td.n{text-align:center;width:62px}
+td{padding:5px 0;border-top:1px solid var(--hair)}
+.sn{font-family:var(--mono);font-size:12px;color:var(--mute)}
+input[type=number]{width:56px;padding:9px 4px;font-family:var(--mono);font-size:15px;
+  text-align:center;color:var(--ink);background:var(--paper);
+  border:1px solid var(--hair);border-radius:3px;appearance:textfield}
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+input:focus{outline:none;border-color:var(--ink)}
+input.ghost{color:var(--mute)}
+input.wide{width:76px}
+.mark{appearance:none;border:1px solid var(--hair);background:var(--paper);
+  width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:14px;
+  color:var(--mute);line-height:1;padding:0;flex:none}
+.mark[aria-pressed=true]{background:var(--moss);border-color:var(--moss);color:#fff}
+.mark:focus-visible{outline:2px solid var(--moss);outline-offset:2px}
+
+.last{font-family:var(--mono);font-size:11px;color:var(--mute);margin:11px 0 0}
+.delta{color:var(--moss)}
+.actions{display:flex;gap:10px;margin-top:16px}
+.btn{flex:1;padding:11px;font-family:var(--sans);font-size:12.5px;cursor:pointer;
+  background:var(--paper);border:1px solid var(--hair);border-radius:3px;color:var(--ink)}
+.btn:active{background:var(--band)}
+.btn.solid{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+.note{background:var(--band);border-radius:3px;padding:13px 15px;font-size:12.5px;
+  color:#4A4741;margin:14px 0 0;line-height:1.5}
+.note.hide{display:none}
+.streak{font-family:var(--mono);font-size:11px;color:var(--moss);margin-top:10px}
+
+.timerbtn{appearance:none;border:1px solid var(--hair);background:var(--paper);
+  border-radius:3px;padding:8px 14px;font-family:var(--mono);font-size:11px;
+  color:var(--ink);cursor:pointer;letter-spacing:.06em}
+
+.wk{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--hair)}
+.wk.atual{background:var(--band);margin:0 -12px;padding-left:12px;padding-right:12px;border-radius:3px}
+.wknum{font-family:var(--mono);font-size:19px;font-weight:300;color:var(--mute);
+  width:30px;flex:none;text-align:center}
+.wk.atual .wknum{color:var(--ink)}
+.wkinfo{flex:1;min-width:0;font-size:12.5px}
+.wkinfo b{display:block;font-size:11px;font-family:var(--mono);color:var(--mute);
+  letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+.wkl{display:block;color:#4A4741}
+.crit{border-top:1px solid var(--hair);padding:12px 0}
+.crit b{display:block;font-size:12.5px;font-weight:500;margin-bottom:3px}
+.crit span{font-size:12.5px;color:#4A4741}
+
+footer{padding:34px 0 40px;font-size:11.5px;color:var(--mute);line-height:1.6}
+#timer{position:fixed;left:50%;transform:translateX(-50%);
+  bottom:calc(20px + env(safe-area-inset-bottom));
+  background:var(--ink);color:var(--paper);padding:11px 20px;border-radius:100px;
+  font-family:var(--mono);font-size:14px;letter-spacing:.06em;display:none;z-index:40;
+  box-shadow:0 6px 22px rgba(43,41,38,.22);cursor:pointer;border:0}
+#timer.on{display:block}
+#timer.zero{background:var(--moss)}
+@media(prefers-reduced-motion:no-preference){
+  .item.open .body{animation:fade .18s ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+}
+</style>
+</head>
+<body>
+
+<header><div class="wrap">
+  <div class="kicker">Programa</div>
+  <h1>Antonio</h1>
+  <div class="meta" id="hoje"></div>
+</div></header>
+
+<nav><div class="wrap" role="tablist" id="tabs"></div></nav>
+<main class="wrap" id="lista"></main>
+
+<footer class="wrap">
+  <div id="stat"></div>
+  <div class="actions">
+    <button class="btn" id="exportar">Baixar histórico</button>
+    <button class="btn" id="limpar">Apagar tudo</button>
+  </div>
+</footer>
+
+<button id="timer" type="button"></button>
+
+<script>
+const D = {"treinos": [{"id": "A", "dia": "Segunda", "nome": "Treino A", "foco": "Inferior pesado + tronco", "ex": [{"id": "a1", "sim": "<path d=\"M4 6h16\"/><path d=\"M7 4v4M17 4v4\"/><path d=\"M12 10v7\"/><path d=\"M9 14l3 3 3-3\"/>", "series": 4, "reps": "6-8", "carga": "40 kg · +2,5 kg/sem", "rest": 90, "p": {"nome": "Agachamento com barra", "execucao": "Barra no trapézio, pés na largura dos ombros levemente rodados para fora. Desça empurrando o quadril para trás, joelho alinhado ao segundo dedo do pé. Vá até a profundidade sem desconforto — não force abaixo disso. Suba empurrando o chão.", "link": "https://www.youtube.com/results?search_query=agachamento+com+barra+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, "a": {"nome": "Agachamento goblet", "execucao": "Halter apoiado no peito, cotovelos por dentro dos joelhos. Mesma mecânica do agachamento com barra, mas o contrapeso à frente ajuda a manter o tronco mais ereto — menos carga na lombar, mais fácil de aprofundar sem dor.", "link": "https://www.youtube.com/results?search_query=agachamento+goblet+halter+execu%C3%A7%C3%A3o+t%C3%A9cnica"}}, {"id": "a2", "sim": "<path d=\"M4 19h15L4 9z\"/><path d=\"M15 6V2M13 4l2-2 2 2\"/>", "series": 4, "reps": "8", "carga": "28 kg / lado", "rest": 90, "p": {"nome": "Supino inclinado com halteres", "execucao": "Banco a 30-45°. Escápulas retraídas e apoiadas. Desça na linha da parte alta do peito, cotovelos a ~45° do tronco. Suba sem bater os halteres no topo, mantendo tensão.", "link": "https://www.youtube.com/results?search_query=supino+inclinado+halteres+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, "a": {"nome": "Supino inclinado no Smith", "execucao": "Mesmo ângulo de banco. A barra guiada reduz a demanda de estabilização, então dá para usar um pouco mais de carga. Desça até tocar de leve a parte alta do peito e suba sem travar o cotovelo.", "link": "https://www.youtube.com/results?search_query=supino+inclinado+smith+machine+execu%C3%A7%C3%A3o+t%C3%A9cnica"}}, {"id": "a3", "sim": "<path d=\"M2 20h20\"/><path d=\"M8 20v-7\"/><path d=\"M14 15h7\"/><path d=\"M17 15v-3\"/>", "series": 3, "reps": "8 / lado", "carga": "Peso corporal (sem. 1-3)", "rest": 90, "p": {"nome": "Búlgaro (split squat)", "execucao": "Pé de trás no banco, pé da frente afastado o bastante para o joelho não ultrapassar muito a ponta do pé. Desça verticalmente, tronco levemente à frente. O trabalho é da perna da frente — a de trás só equilibra.", "link": "https://www.youtube.com/results?search_query=bulgarian+split+squat+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, "a": {"nome": "Split squat estático no chão", "execucao": "Mesma posição, mas com o pé de trás apoiado no chão em vez do banco. Menos exigência de equilíbrio e menor amplitude de quadril — boa opção em dia de joelho mais sensível ou quando o banco estiver ocupado.", "link": "https://www.youtube.com/results?search_query=split+squat+est%C3%A1tico+halteres+execu%C3%A7%C3%A3o+t%C3%A9cnica"}}, {"id": "a4", "sim": "<path d=\"M3 6h4v12H3z\"/><path d=\"M20 12h-9\"/><path d=\"M14 9l-3 3 3 3\"/>", "series": 3, "reps": "10 / lado", "carga": "Ajustar para RIR 2", "rest": 60, "p": {"nome": "Remada unilateral na máquina", "execucao": "Peito apoiado, um braço de cada vez. Comece deprimindo a escápula, depois puxe conduzindo pelo cotovelo em direção ao quadril. Amplitude completa: deixe a escápula protrair no final da volta.", "link": "https://www.youtube.com/results?search_query=remada+unilateral+m%C3%A1quina+hammer+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, "a": {"nome": "Remada unilateral na polia baixa", "execucao": "Sentado ou em pé com apoio, pegada neutra, um braço por vez. Puxe até a mão chegar à lateral do abdômen sem rodar o tronco. A polia mantém tensão constante em toda a amplitude.", "link": "https://www.youtube.com/results?search_query=remada+unilateral+polia+baixa+execu%C3%A7%C3%A3o+t%C3%A9cnica"}}, {"id": "a5", "sim": "<path d=\"M12 4v16\"/><path d=\"M8 12H3M6 9l-3 3 3 3\"/><path d=\"M16 12h5M18 9l3 3-3 3\"/>", "series": 3, "reps": "15", "carga": "Ajustar para RIR 2-3", "rest": 45, "p": {"nome": "Cadeira abdutora", "execucao": "Costas apoiadas no encosto, sem inclinar o tronco para trás para ganhar amplitude. Abra de forma controlada e resista na volta — a fase de retorno é onde está boa parte do estímulo. Pausa de 1 s na abertura máxima.", "link": "https://www.youtube.com/results?search_query=cadeira+abdutora+gl%C3%BAteo+m%C3%A9dio+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, "a": {"nome": "Abdução de quadril em pé na polia", "execucao": "Tornozeleira na polia baixa, apoio na máquina com a mão oposta. Afaste a perna sem inclinar o tronco para o lado contrário. Versão em apoio unilateral — treina o glúteo médio também como estabilizador.", "link": "https://www.youtube.com/results?search_query=abdu%C3%A7%C3%A3o+quadril+em+p%C3%A9+polia+execu%C3%A7%C3%A3o+t%C3%A9cnica"}}, {"id": "a6", "sim": "<path d=\"M3 20h7v-5h7\"/><path d=\"M19 13V5M16 8l3-3 3 3\"/>", "series": 4, "reps": "12", "carga": "40-60 kg", "rest": 60, "p": {"nome": "Panturrilha em pé", "execucao": "Antepé no degrau, calcanhar livre. Desça até sentir alongamento e suba até a máxima flexão plantar. Pausa de 1 s no topo. Joelho estendido para priorizar o gastrocnêmio.", "link": "https://www.youtube.com/results?search_query=panturrilha+em+p%C3%A9+g%C3%AAmeos+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, "a": {"nome": "Panturrilha no leg press", "execucao": "Antepé na borda inferior da plataforma, joelho quase estendido. Mesma amplitude completa. Vantagem: a carga fica na plataforma e não comprime a coluna.", "link": "https://www.youtube.com/results?search_query=panturrilha+leg+press+execu%C3%A7%C3%A3o+t%C3%A9cnica"}}, {"id": "a7", "sim": "<path d=\"M3 4h18\"/><path d=\"M12 5v8h7\"/><path d=\"M12 13a7 7 0 0 1 7-5\" stroke-dasharray=\"2 2.5\"/>", "series": 3, "reps": "12", "carga": "Peso corporal", "rest": 45, "p": {"nome": "Elevação de pernas suspensa", "execucao": "Pendurado na barra, sem balanço. Eleve os joelhos até o quadril passar de 90°, enrolando a pelve no final. Desça lentamente. Se começar a balançar, reduza a amplitude.", "link": "https://www.youtube.com/results?search_query=eleva%C3%A7%C3%A3o+de+pernas+suspensa+barra+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, "a": {"nome": "Elevação de pernas no banco declinado", "execucao": "Deitado, mãos segurando atrás da cabeça. Eleve as pernas mantendo a lombar colada ao banco. Menos exigência de pegada — boa opção quando o antebraço falha antes do abdômen.", "link": "https://www.youtube.com/results?search_query=eleva%C3%A7%C3%A3o+de+pernas+banco+declinado+execu%C3%A7%C3%A3o+t%C3%A9cnica"}}]}, {"id": "B", "dia": "Quarta", "nome": "Treino B", "foco": "Superior + manutenção de joelho", "ex": [{"id": "b1", "sim": "<path d=\"M4 4h16\"/><path d=\"M12 20v-9\"/><path d=\"M9 14l3-3 3 3\"/>", "series": 4, "reps": "8", "carga": "Assistência p/ RIR 2", "rest": 60, "p": {"nome": "Graviton", "execucao": "Pegada pouco mais aberta que os ombros. Comece deprimindo as escápulas antes de dobrar o cotovelo. Suba até o queixo passar a barra. Reduza a assistência conforme progride.", "link": "https://www.youtube.com/results?search_query=graviton+barra+assistida+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, "a": {"nome": "Puxada alta pegada neutra", "execucao": "Triângulo ou pegada paralela. Puxe até a barra chegar à clavícula, peito aberto. A pegada neutra é mais amigável ao ombro em quem tem volume alto de esporte overhead.", "link": "https://www.youtube.com/results?search_query=puxada+alta+pegada+neutra+execu%C3%A7%C3%A3o+t%C3%A9cnica"}}, {"id": "b2", "sim": "<path d=\"M3 7h4v10H3z\"/><path d=\"M9 12h11\"/><path d=\"M17 9l3 3-3 3\"/>", "series": 3, "reps": "10", "carga": "50-60 kg", "rest": 60, "p": {"nome": "Supino máquina", "execucao": "Assento ajustado para os pegadores ficarem na linha do meio do peito. Escápulas apoiadas. Empurre até quase estender o cotovelo, sem travar. Volte até sentir alongamento.", "link": "https://www.youtube.com/results?search_query=supino+m%C3%A1quina+peitoral+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, "a": {"nome": "Supino reto com halteres", "execucao": "Escápulas retraídas, pés firmes no chão. Desça até os halteres ficarem na linha do peito, cotovelos a ~45°. Mais demanda de estabilização que a máquina.", "link": "https://www.youtube.com/results?search_query=supino+reto+halteres+execu%C3%A7%C3%A3o+t%C3%A9cnica"}}, {"id": "b3", "sim": "<path d=\"M20 4v16\"/><path d=\"M17 12H5\"/><path d=\"M8 9l-3 3 3 3\"/>", "series": 3, "reps": "12", "carga": "50-60 kg", "rest": 60, "p": {"nome": "Remada baixa", "execucao": "Tronco ereto, joelhos levemente flexionados. Puxe o triângulo ao abdômen aproximando as escápulas. Sem impulso de tronco — o movimento vem dos braços e das costas.", "link": "https://www.youtube.com/results?search_query=remada+baixa+sentada+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, "a": {"nome": "Remada na máquina com peito apoiado", "execucao": "Peito no apoio, o que elimina qualquer possibilidade de usar impulso. Puxe até as escápulas se aproximarem e segure meio segundo. Excelente para sentir a musculatura do meio das costas.", "link": "https://www.youtube.com/results?search_query=remada+m%C3%A1quina+peito+apoiado+execu%C3%A7%C3%A3o+t%C3%A9cnica"}}, {"id": "b4", "sim": "<path d=\"M5 5h5M14 5h5\"/><path d=\"M12 20V9\"/><path d=\"M9 12l3-3 3 3\"/>", "series": 3, "reps": "10", "carga": "16-18 kg / lado", "rest": 60, "p": {"nome": "Desenvolvimento com halteres", "execucao": "Sentado com encosto. Halteres na altura das orelhas, cotovelos levemente à frente do corpo. Empurre para cima aproximando os halteres sem batê-los. Não hiperestenda a lombar no topo.", "link": "https://www.youtube.com/results?search_query=desenvolvimento+ombro+halteres+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, "a": {"nome": "Desenvolvimento na máquina", "execucao": "Assento ajustado para os pegadores ficarem na altura dos ombros. Trajetória guiada, menor demanda de estabilização — útil em dia de ombro cansado pelo tênis ou vôlei.", "link": "https://www.youtube.com/results?search_query=desenvolvimento+ombro+m%C3%A1quina+execu%C3%A7%C3%A3o+t%C3%A9cnica"}}, {"id": "b5", "sim": "<path d=\"M6 15a6.5 6.5 0 1 1 4 5\"/><path d=\"M3 12l3 3 3-3\"/>", "series": 3, "reps": "15 / lado", "carga": "5-7 kg (leve)", "rest": 45, "p": {"nome": "Rotação externa na polia", "execucao": "Cotovelo colado ao tronco, flexionado a 90°, com uma toalha dobrada entre braço e costela. Rode o antebraço para fora mantendo o cotovelo parado. Carga leve — é prevenção, não força.", "link": "https://www.youtube.com/results?search_query=rota%C3%A7%C3%A3o+externa+ombro+polia+manguito+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, "a": {"nome": "Rotação externa deitado de lado", "execucao": "Deitado de lado, cotovelo a 90° apoiado na costela, halter leve na mão de cima. Rode o antebraço para cima até a vertical. Mesma função, sem depender da polia estar livre.", "link": "https://www.youtube.com/results?search_query=rota%C3%A7%C3%A3o+externa+deitado+de+lado+halter+execu%C3%A7%C3%A3o+t%C3%A9cnica"}}, {"id": "b6", "sim": "<path d=\"M8 3v9\"/><path d=\"M8 12h4\"/><path d=\"M17 8v9\"/><path d=\"M14 14l3 3 3-3\"/>", "series": 3, "reps": "12", "carga": "25-30 kg", "rest": 45, "p": {"nome": "Tríceps na polia (corda)", "execucao": "Cotovelos travados ao lado do tronco. Estenda o antebraço afastando as pontas da corda no final. Só o antebraço se move — se o cotovelo viaja para frente, a carga está alta.", "link": "https://www.youtube.com/results?search_query=tr%C3%ADceps+polia+corda+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, "a": {"nome": "Tríceps francês com halter", "execucao": "Sentado ou em pé, halter atrás da cabeça com as duas mãos. Cotovelos apontados para cima e parados. Estende com controle. Trabalha a cabeça longa em maior alongamento.", "link": "https://www.youtube.com/results?search_query=tr%C3%ADceps+franc%C3%AAs+halter+execu%C3%A7%C3%A3o+t%C3%A9cnica"}}, {"id": "b7", "sim": "<path d=\"M8 21v-9\"/><path d=\"M8 12h4\"/><path d=\"M17 17V8\"/><path d=\"M14 11l3-3 3 3\"/>", "series": 3, "reps": "12", "carga": "25-30 kg", "rest": 45, "p": {"nome": "Bíceps na polia / rosca inversa", "execucao": "Cotovelos ao lado do tronco, sem balanço. Alterne semanas entre pegada supinada (bíceps) e pronada (braquial e braquiorradial).", "link": "https://www.youtube.com/results?search_query=rosca+b%C3%ADceps+polia+baixa+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, "a": {"nome": "Rosca alternada com halteres", "execucao": "Em pé, halteres ao lado do corpo. Suba um por vez supinando o punho durante a subida. Sem balançar o tronco. Permite corrigir assimetria entre os lados.", "link": "https://www.youtube.com/results?search_query=rosca+alternada+halteres+execu%C3%A7%C3%A3o+t%C3%A9cnica"}}, {"id": "b8", "sim": "<path d=\"M5 7v9h6\"/><path d=\"M11 16l8-4\"/><path d=\"M11 16a8 8 0 0 1 8-4\" stroke-dasharray=\"2 2.5\"/>", "series": 3, "reps": "12 / lado", "carga": "15-20 kg (moderado)", "rest": 45, "p": {"nome": "Cadeira extensora unilateral", "execucao": "AMPLITUDE 0-45° APENAS: parta da perna dobrada e estenda só até metade do caminho. Esse arco reduzido é o de menor compressão patelofemoral. Pausa de 1 s no topo. Nunca busque carga máxima aqui.", "link": "https://www.youtube.com/results?search_query=cadeira+extensora+unilateral+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, "a": {"nome": "Extensão terminal de joelho com banda", "execucao": "Banda presa à frente na altura do joelho, ela puxa o joelho para a flexão. Em pé, estenda o joelho contra a resistência até travar. Trabalha o vasto medial no arco final, sem compressão da patela.", "link": "https://www.youtube.com/results?search_query=terminal+knee+extension+banda+TKE+execu%C3%A7%C3%A3o+t%C3%A9cnica"}}]}, {"id": "C", "dia": "Sábado", "nome": "Treino C", "foco": "Inferior + potência", "ex": [{"id": "c1", "sim": "<path d=\"M4 19h16\"/><path d=\"M9 16V5M6 8l3-3 3 3\"/><path d=\"M16 16V9M14 11l2-2 2 2\"/>", "series": 5, "reps": "3", "carga": "Barra vazia a 30 kg", "rest": 120, "p": {"nome": "Agachamento explosivo", "execucao": "Carga leve, execução com INTENÇÃO MÁXIMA DE VELOCIDADE na subida. Desça controlado, suba o mais rápido que conseguir. Descanso de 2 min entre séries — é treino de potência, não de fadiga. Pare a série se a velocidade cair.", "link": "https://www.youtube.com/results?search_query=agachamento+explosivo+pot%C3%AAncia+velocidade+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, "a": {"nome": "Leg press explosivo", "execucao": "Carga leve (60-90 kg), amplitude limitada a ~90° de flexão. Desça controlado e empurre o mais rápido possível sem tirar o pé da plataforma. Mesma intenção de velocidade, sem carga na coluna.", "link": "https://www.youtube.com/results?search_query=leg+press+explosivo+pot%C3%AAncia+execu%C3%A7%C3%A3o+t%C3%A9cnica"}}, {"id": "c2", "sim": "<path d=\"M3 4v16\"/><path d=\"M8 12h10\"/><path d=\"M15 9l3 3-3 3\"/><path d=\"M9 18a7 7 0 0 0 5-3\" stroke-dasharray=\"2 2.2\"/>", "series": 3, "reps": "20-25 s / lado", "carga": "10-15 kg · anote os segundos em reps", "rest": 45, "p": {"nome": "Pallof press na polia", "execucao": "Polia na altura do esterno, de lado para ela. Pés na largura do quadril — mais aberto que isso e as pernas assumem a estabilização no lugar do core. Traga as mãos ao peito, estenda os braços à frente e SEGURE resistindo à tração lateral. O tronco não gira e a lombar não arqueia — esse é o exercício inteiro. A versão em pé é a que mais exige dos estabilizadores de quadril. Registre os segundos de sustentação no campo de reps.", "link": "https://www.youtube.com/results?search_query=pallof+press+polia+anti-rota%C3%A7%C3%A3o+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, "a": {"nome": "Pallof press meio-ajoelhado", "execucao": "Mesma execução, com um joelho no chão e o outro à frente a 90°, o joelho de baixo do lado da polia. Tira a contribuição das pernas e vira o desafio mais completo de core e controle postural entre as variações. Use menos carga que na versão em pé.", "link": "https://www.youtube.com/results?search_query=pallof+press+half+kneeling+execu%C3%A7%C3%A3o+t%C3%A9cnica"}}, {"id": "c3", "sim": "<path d=\"M4 20h11\"/><path d=\"M9 20v-8\"/><path d=\"M9 12l9-3\"/><path d=\"M9 12a9 9 0 0 0 9-3\" stroke-dasharray=\"2 2.5\"/>", "series": 4, "reps": "8", "carga": "40-50 kg", "rest": 90, "p": {"nome": "Levantamento terra romeno", "execucao": "Joelhos levemente flexionados e FIXOS. Empurre o quadril para trás deixando a barra deslizar rente à perna. Desça até sentir alongamento no posterior — normalmente pouco abaixo do joelho. Coluna neutra o tempo todo.", "link": "https://www.youtube.com/results?search_query=levantamento+terra+romeno+RDL+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, "a": {"nome": "Elevação pélvica com barra", "execucao": "Escápulas apoiadas no banco, barra sobre o quadril com almofada. Pés na largura do quadril, tíbias verticais no topo. Estenda o quadril até o tronco ficar paralelo ao chão e segure 1 s contraindo o glúteo. Queixo para baixo — não estenda a lombar para ganhar amplitude. Produz mais ativação de glúteo e isquiotibial que o terra romeno sob a mesma carga, e sem nenhuma compressão da coluna.", "link": "https://www.youtube.com/results?search_query=eleva%C3%A7%C3%A3o+p%C3%A9lvica+barra+hip+thrust+execu%C3%A7%C3%A3o+t%C3%A9cnica"}}, {"id": "c4", "sim": "<path d=\"M3 9h9\"/><path d=\"M12 9a7 7 0 0 1-3 10\"/><path d=\"M12 19H9v-3\"/>", "series": 3, "reps": "12", "carga": "Ajustar para RIR 2", "rest": 60, "p": {"nome": "Mesa flexora", "execucao": "Deitado, almofada logo acima do calcanhar. Flexione o joelho até o máximo e desça em 3 segundos — a fase excêntrica é o que protege o isquiotibial em sprint. Quadril colado no apoio.", "link": "https://www.youtube.com/results?search_query=mesa+flexora+deitada+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, "a": {"nome": "Cadeira flexora sentada", "execucao": "Mesma função em posição sentada, com o quadril flexionado. Costas apoiadas, desça controlado. Alguns sentem menos câimbra nessa versão que na mesa.", "link": "https://www.youtube.com/results?search_query=cadeira+flexora+sentada+execu%C3%A7%C3%A3o+t%C3%A9cnica"}}, {"id": "c5", "sim": "<path d=\"M2 20h20\"/><path d=\"M7 20l3-9\"/><path d=\"M10 11l6 9\"/>", "series": 3, "reps": "10 / lado", "carga": "Peso corporal → 10-12 kg", "rest": 75, "p": {"nome": "Afundo reverso", "execucao": "Passo para trás, desça até o joelho de trás quase tocar o chão, e volte ao ponto de partida empurrando com o calcanhar da perna da frente. Tronco ereto. Gera menos força patelofemoral e menor taxa de carregamento que o afundo à frente, e recruta mais cadeia posterior. TRUQUE: pé da frente sobre uma anilha de 10 cm reduz ainda mais o estresse na patela na faixa de 40-60° de flexão.", "link": "https://www.youtube.com/results?search_query=afundo+reverso+reverse+lunge+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, "a": {"nome": "Afundo caminhando", "execucao": "Passo à frente, desça até o joelho de trás quase tocar o chão, empurre com o calcanhar da frente para o próximo passo. Mais dominante de quadríceps e mais exigente para a patela que o reverso — use nas semanas em que o joelho estiver silencioso.", "link": "https://www.youtube.com/results?search_query=afundo+caminhando+lunge+execu%C3%A7%C3%A3o+t%C3%A9cnica"}}, {"id": "c6", "sim": "<path d=\"M12 4v16\"/><path d=\"M3 12h5M5 9l3 3-3 3\"/><path d=\"M21 12h-5M19 9l-3 3 3 3\"/>", "series": 3, "reps": "12", "carga": "Ajustar para RIR 2-3", "rest": 45, "p": {"nome": "Cadeira adutora", "execucao": "Costas no encosto. Aproxime os joelhos de forma controlada e resista bastante na volta. Prevenção de lesão de virilha — não é exercício de carga máxima. Pausa de 1 s no fechamento.", "link": "https://www.youtube.com/results?search_query=cadeira+adutora+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, "a": {"nome": "Cossack squat", "execucao": "Pés bem afastados, desça sobre uma perna mantendo a outra estendida com o pé apoiado no chão. Versão em cadeia fechada, com componente de mobilidade de quadril e tornozelo.", "link": "https://www.youtube.com/results?search_query=cossack+squat+execu%C3%A7%C3%A3o+t%C3%A9cnica"}}, {"id": "c7", "sim": "<path d=\"M4 5v11h6\"/><path d=\"M2 10h10\"/><path d=\"M10 16v3\"/><path d=\"M19 17V7M16 10l3-3 3 3\"/>", "series": 4, "reps": "15", "carga": "30-40 kg", "rest": 45, "p": {"nome": "Panturrilha sentada", "execucao": "Joelho flexionado a 90° — essa posição isola o sóleo, principal absorvedor de carga na corrida em joelho flexionado. Amplitude completa, pausa embaixo e em cima. Prioridade real, não acessório de fim de treino.", "link": "https://www.youtube.com/results?search_query=panturrilha+sentada+s%C3%B3leo+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, "a": {"nome": "Elevação de calcanhar sentado com halter", "execucao": "Sentado no banco, halter apoiado sobre a coxa perto do joelho, antepé num degrau ou anilha. Mesma mecânica da máquina. Solução quando a panturrilha sentada estiver ocupada.", "link": "https://www.youtube.com/results?search_query=panturrilha+sentada+halter+na+coxa+execu%C3%A7%C3%A3o+t%C3%A9cnica"}}]}], "rotinas": [{"id": "manha", "nome": "Manhã", "min": 10, "nota": "Alongamento estático com sustentações de 30 s. Sem treino nas horas seguintes, então não há risco de prejudicar força ou potência.", "itens": [{"sim": "<path d=\"M12 4v7\"/><path d=\"M5 11c0 5 3 8 7 8s7-3 7-8\"/><path d=\"M5 11h14\"/>", "nome": "Respiração diafragmática", "dose": "60 s", "seg": 60, "execucao": "Deitado ou sentado, mão no abdômen. Inspire pelo nariz expandindo a barriga, expire lento pela boca. Serve para sair do modo de despertar e reduzir tônus antes de alongar."}, {"sim": "<path d=\"M3 15c4-7 14-7 18 0\"/><path d=\"M3 15v3M21 15v3\"/>", "nome": "Gato-camelo + rotação torácica", "dose": "60 s", "seg": 60, "execucao": "Quatro apoios. Alterne arquear e arredondar a coluna em 10 repetições lentas. Depois, mão atrás da cabeça, rode o tronco abrindo o cotovelo para o teto, 8 vezes de cada lado.", "link": "https://www.youtube.com/results?search_query=gato+camelo+mobilidade+tor%C3%A1cica+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, {"sim": "<path d=\"M4 6v8h7\"/><path d=\"M13 14h7v-6\"/>", "nome": "90/90 de quadril", "dose": "90 s", "seg": 90, "execucao": "Sentado no chão, uma perna à frente a 90° e a outra ao lado a 90°. Alterne os lados girando pelo quadril sem usar as mãos. Movimento contínuo, não sustentação.", "link": "https://www.youtube.com/results?search_query=90+90+hip+mobility+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, {"sim": "<path d=\"M3 20h18\"/><path d=\"M6 20l6-9\"/><path d=\"M12 11l4 5v4\"/>", "nome": "Flexor de quadril ajoelhado", "dose": "2 × 30 s / lado", "seg": 60, "execucao": "Meio ajoelhado, joelho de trás no chão. Contraia o glúteo do lado de trás e avance o quadril sem arquear a lombar. O alongamento aparece na frente da coxa e da virilha.", "link": "https://www.youtube.com/results?search_query=alongamento+flexor+quadril+ajoelhado+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, {"sim": "<path d=\"M11 4v8\"/><path d=\"M11 12l-5 6\"/><path d=\"M11 12l6 3-3 5\"/>", "nome": "Quadríceps em pé", "dose": "2 × 30 s / lado", "seg": 60, "execucao": "Em pé, segure o tornozelo levando o calcanhar ao glúteo. Joelhos alinhados e quadril neutro — não deixe a lombar arquear para ganhar amplitude. Especialmente relevante no seu caso: quadríceps encurtado aumenta a compressão da patela.", "link": "https://www.youtube.com/results?search_query=alongamento+quadr%C3%ADceps+em+p%C3%A9+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, {"sim": "<path d=\"M4 18h6\"/><path d=\"M6 18L18 7\"/><path d=\"M14 4l4 3-3 4\"/>", "nome": "Isquiotibiais com faixa", "dose": "2 × 30 s / lado", "seg": 60, "execucao": "Deitado, faixa no pé, perna estendida subindo até sentir tensão. A outra perna fica estendida no chão. Não force o joelho em hiperextensão.", "link": "https://www.youtube.com/results?search_query=alongamento+isquiotibiais+faixa+deitado+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, {"sim": "<path d=\"M5 17h14\"/><path d=\"M9 17V9\"/><path d=\"M9 12l8-4\"/>", "nome": "Piriforme / glúteo (figura 4)", "dose": "2 × 30 s / lado", "seg": 60, "execucao": "Deitado, tornozelo sobre o joelho oposto formando um 4. Puxe a coxa de baixo em direção ao peito. O alongamento aparece no glúteo profundo.", "link": "https://www.youtube.com/results?search_query=alongamento+piriforme+figura+4+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, {"sim": "<path d=\"M20 5v14\"/><path d=\"M4 19h10\"/><path d=\"M6 19L17 8\"/>", "nome": "Panturrilha — gastrocnêmio", "dose": "2 × 30 s / lado", "seg": 60, "execucao": "Mãos na parede, perna de trás estendida e calcanhar no chão. Joelho reto isola o gastrocnêmio.", "link": "https://www.youtube.com/results?search_query=alongamento+gastrocn%C3%AAmio+parede+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, {"sim": "<path d=\"M20 4v16\"/><path d=\"M4 20h8\"/><path d=\"M7 20v-7\"/><path d=\"M7 13l9-4\"/>", "nome": "Panturrilha — sóleo", "dose": "2 × 30 s / lado", "seg": 60, "execucao": "Mesma posição, mas com o joelho de trás flexionado. Essa flexão transfere o alongamento para o sóleo, que é o principal absorvedor de carga na corrida.", "link": "https://www.youtube.com/results?search_query=alongamento+s%C3%B3leo+joelho+flexionado+execu%C3%A7%C3%A3o+t%C3%A9cnica"}]}, {"id": "presessao", "nome": "Pré-sessão", "min": 10, "nota": "Antes de academia, vôlei, tênis ou corrida. Só movimento dinâmico e ativação — nenhuma sustentação estática longa, que reduziria força e potência na sequência. O Spanish squat fecha a rotina: isometria de quadríceps produz analgesia e reduz inibição cortical, com efeito que dura cerca de 45 minutos.", "itens": [{"sim": "<circle cx=\"7\" cy=\"16\" r=\"4\"/><circle cx=\"18\" cy=\"16\" r=\"4\"/><path d=\"M7 16l4-8h4\"/>", "nome": "Bike ou caminhada rápida", "dose": "3 min", "seg": 180, "execucao": "Elevar temperatura corporal antes de qualquer coisa. Intensidade baixa, só para aquecer de fato."}, {"sim": "<path d=\"M20 4v16\"/><path d=\"M6 20h8\"/><path d=\"M9 20v-7l7-4\"/>", "nome": "Tornozelo joelho-parede", "dose": "10 reps / lado", "seg": 60, "execucao": "Pé a um palmo da parede, empurre o joelho à frente tentando tocar a parede sem tirar o calcanhar do chão. Dorsiflexão limitada joga o agachamento para a frente e aumenta a carga na patela.", "link": "https://www.youtube.com/results?search_query=mobilidade+tornozelo+knee+to+wall+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, {"sim": "<path d=\"M4 3v18\"/><path d=\"M12 4v9\"/><path d=\"M12 13l7 5\"/><path d=\"M7 19a9 9 0 0 1 11-5\" stroke-dasharray=\"2 2.5\"/>", "nome": "Balanço de perna frontal e lateral", "dose": "10 reps / lado", "seg": 70, "execucao": "Apoio na parede. Balance a perna à frente e atrás 10 vezes, depois de um lado ao outro 10 vezes. Amplitude crescente, sem forçar o fim do movimento.", "link": "https://www.youtube.com/results?search_query=leg+swings+aquecimento+din%C3%A2mico+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, {"sim": "<path d=\"M4 18h5M15 18h5\"/><path d=\"M6 18v-5M18 18v-5\"/><path d=\"M6 13h12\" stroke-dasharray=\"2 2\"/><path d=\"M9 8h6\"/>", "nome": "Caminhada lateral com banda", "dose": "10 passos / lado", "seg": 60, "execucao": "Banda acima dos joelhos, semi-agachado. Passos laterais mantendo tensão na banda. Ativa o glúteo médio antes de carregar o joelho.", "link": "https://www.youtube.com/results?search_query=caminhada+lateral+banda+gl%C3%BAteo+m%C3%A9dio+execu%C3%A7%C3%A3o+t%C3%A9cnica"}, {"sim": "<path d=\"M5 20l3-8h8l3 8\"/><path d=\"M12 3v6\"/><path d=\"M9 6l3 3 3-3\"/>", "nome": "Agachamento com peso corporal", "dose": "10 reps", "seg": 45, "execucao": "Amplitude confortável, ritmo controlado. Ensaia o padrão antes de colocar carga."}, {"sim": "<path d=\"M21 4v16\"/><path d=\"M5 20v-7\"/><path d=\"M5 13h8\"/><path d=\"M13 13v7\"/><path d=\"M13 13c4 0 8 2 8 2\" stroke-dasharray=\"2 2\"/>", "nome": "Spanish squat isométrico", "dose": "5 × 30 s", "seg": 210, "execucao": "Banda forte ancorada atrás na altura do joelho, passando POR TRÁS dos joelhos (não abaixo). Em pé, deixe a banda puxar o joelho para trás e agache até cerca de 60° de flexão, mantendo a tíbia vertical. SEGURE 30 s. É o item de maior evidência da rotina: a isometria de quadríceps produz analgesia imediata e reduz a inibição cortical do quadríceps, deixando você carregar melhor na sessão seguinte.", "link": "https://www.youtube.com/results?search_query=spanish+squat+isom%C3%A9trico+banda+execu%C3%A7%C3%A3o+t%C3%A9cnica"}]}, {"id": "noite", "nome": "Noite", "min": 10, "nota": "Depois do treino ou antes de dormir. Sustentações longas de 45 s são bem-vindas aqui, porque não há esforço de força ou potência na sequência.", "itens": [{"sim": "<path d=\"M11 4v8\"/><path d=\"M11 12l-5 6\"/><path d=\"M11 12l6 3-3 5\"/>", "nome": "Quadríceps deitado de lado", "dose": "2 × 45 s / lado", "seg": 90, "execucao": "Deitado de lado, puxe o calcanhar ao glúteo com a mão de cima. Posição deitada facilita manter o quadril neutro e evita compensação na lombar."}, {"sim": "<path d=\"M3 20h18\"/><path d=\"M6 20l6-9\"/><path d=\"M12 11l4 5v4\"/>", "nome": "Flexor de quadril ajoelhado", "dose": "2 × 45 s / lado", "seg": 90, "execucao": "Mesma execução da manhã, com sustentação mais longa. Relevante depois de um dia sentado ou de vôlei."}, {"sim": "<path d=\"M4 18h6\"/><path d=\"M6 18L18 7\"/><path d=\"M14 4l4 3-3 4\"/>", "nome": "Isquiotibiais com faixa", "dose": "2 × 45 s / lado", "seg": 90, "execucao": "Sustentação longa, respirando fundo e soltando a tensão a cada expiração."}, {"sim": "<path d=\"M5 17h14\"/><path d=\"M9 17V9\"/><path d=\"M9 12l8-4\"/>", "nome": "Piriforme / glúteo", "dose": "2 × 45 s / lado", "seg": 90, "execucao": "Pode ser deitado ou sentado na cadeira com o tornozelo sobre o joelho oposto."}, {"sim": "<path d=\"M20 5v14\"/><path d=\"M4 19h10\"/><path d=\"M6 19L17 8\"/>", "nome": "Panturrilha — gastrocnêmio", "dose": "45 s / lado", "seg": 45, "execucao": "Prioridade nos dias de vôlei de areia e de corrida."}, {"sim": "<path d=\"M20 4v16\"/><path d=\"M4 20h8\"/><path d=\"M7 20v-7\"/><path d=\"M7 13l9-4\"/>", "nome": "Panturrilha — sóleo", "dose": "45 s / lado", "seg": 45, "execucao": "Idem, com o joelho flexionado."}, {"sim": "<path d=\"M3 5v14\"/><path d=\"M9 20v-8\"/><path d=\"M9 12h8\"/><path d=\"M9 12c-3 0-6 1-6 1\" stroke-dasharray=\"2 2\"/><path d=\"M17 9l3 3-3 3\"/>", "nome": "Extensão terminal de joelho com banda", "dose": "3 × 15 / lado", "seg": 120, "execucao": "Banda à frente na altura do joelho, puxando para a flexão. Em pé, estenda o joelho contra a resistência até travar e segure 2 s. Trabalha o vasto medial no arco final, sem compressão da patela.", "link": "https://www.youtube.com/results?search_query=terminal+knee+extension+banda+execu%C3%A7%C3%A3o+t%C3%A9cnica"}]}], "corrida": {"semanas": [{"n": 1, "sexta": "5 × (2 min corrida / 2 min caminhada)", "fmin": 10, "domingo": "6 × (2 min corrida / 2 min caminhada)", "dmin": 12, "foco": "Introduzir impacto"}, {"n": 2, "sexta": "5 × (2 min / 2 min)", "fmin": 10, "domingo": "5 × (3 min / 2 min)", "dmin": 15, "foco": "Alongar o bloco de corrida"}, {"n": 3, "sexta": "5 × (3 min / 2 min)", "fmin": 15, "domingo": "6 × (3 min / 1min30)", "dmin": 18, "foco": "Encurtar a caminhada"}, {"n": 4, "sexta": "5 × (3 min / 1min30)", "fmin": 15, "domingo": "5 × (4 min / 1min30)", "dmin": 20, "foco": "Últimos blocos com caminhada"}, {"n": 5, "sexta": "12 min contínuo", "fmin": 12, "domingo": "20 min contínuo", "dmin": 20, "foco": "Primeira semana sem caminhada"}, {"n": 6, "sexta": "14 min contínuo", "fmin": 14, "domingo": "22 min contínuo", "dmin": 22, "foco": "+10% sobre a mais longa"}, {"n": 7, "sexta": "15 min contínuo", "fmin": 15, "domingo": "24 min contínuo", "dmin": 24, "foco": "+9% sobre a mais longa"}, {"n": 8, "sexta": "16 min contínuo", "fmin": 16, "domingo": "26 min contínuo + 4 × 20 s strides", "dmin": 26, "foco": "Primeiro estímulo de velocidade"}], "cadencia": "Meça sua cadência natural nas duas primeiras corridas pelo Garmin. O alvo é a SUA cadência preferida + 5 a 10%, não um número absoluto. Aumentar a cadência em 10% reduz a força patelofemoral em até 20%. Se sua natural for 160, mire 168-176 — não force 180 só porque é o número que circula por aí.", "ritmo": "Ancore em esforço, não em pace. Você deve conseguir falar frases completas. Seus tempos antigos (5 km a 4:54) não dizem nada sobre a prontidão do tecido hoje — o sistema cardiovascular volta bem antes do tendão e da cartilagem.", "dias": "Domingo é a corrida principal porque fica a cerca de 72 h do vôlei de areia de quinta. Sexta fica a 20 h da quinta, dentro da janela em que o dano excêntrico da areia se manifesta — por isso é a sessão curta, não a principal.", "criterios": [["Progredir para a próxima semana", "Desconforto no joelho ≤ 2/10 durante a corrida, resolvido em até 24 h, sem rigidez ao acordar no dia seguinte."], ["Repetir a semana atual", "Desconforto entre 3 e 4/10, ou desconforto que ainda aparece 24 h depois. Repita em vez de avançar — repetir não é atraso."], ["Recuar uma semana", "Dor acima de 4/10, ou dor que persiste além de 48 h, ou qualquer inchaço. Se repetir na semana seguinte, procure avaliação."], ["Teto por sessão", "A partir da semana 5, quando a corrida vira contínua, nenhuma sessão deve passar de 110% da sua mais longa dos últimos 30 dias. Esse critério prevê lesão melhor que a regra dos 10% semanais, que foi testada em ensaio randomizado e não reduziu lesões. Nas semanas 1 a 4 os volumes são baixos demais para o teto fazer sentido — ali quem manda é o critério de dor."]], "nota_forca": "A sua academia é a principal prevenção de lesão da corrida: uma meta-análise de 26 ensaios randomizados encontrou redução de cerca de 50% em lesões por sobrecarga com treino de força. Não pule os treinos para correr mais."}};
+const TREINOS = D.treinos, ROTINAS = D.rotinas, CORRIDA = D.corrida;
+const KEY = "treino-antonio-v3";
+
+const store = (() => {
+  let ok = true, mem = null;
+  try { localStorage.setItem("__t","1"); localStorage.removeItem("__t"); } catch(e){ ok = false; }
+  return {
+    persistente: ok,
+    ler(){ if(!ok) return mem || {};
+      try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e){ return {}; } },
+    gravar(o){ if(!ok){ mem = o; return; }
+      try { localStorage.setItem(KEY, JSON.stringify(o)); } catch(e){ ok = false; mem = o; } }
+  };
+})();
+
+let db = store.ler();
+db.hist = db.hist || {};          // cargas de força
+db.variante = db.variante || {};  // principal/alternativo
+db.mob = db.mob || {};            // {data, feitos:[], streak, ultimoDia}
+db.run = db.run || { semana:1, log:[] };
+let ativo = "A";
+const sessao = {};
+
+const hoje = () => new Date().toISOString().slice(0,10);
+const fmtData = s => s.split("-").reverse().slice(0,2).join("/");
+const chave = (id,v) => id + ":" + v;
+const svg = p => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" '
+  + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>';
+
+document.getElementById("hoje").textContent =
+  new Date().toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"});
+
+/* ------------------------------------------------------------------ abas */
+const ABAS = TREINOS.map(t => ({id:t.id, rot:t.dia + " · " + t.id, tipo:"forca"}))
+  .concat([{id:"MOB", rot:"Mobilidade", tipo:"mob"}, {id:"RUN", rot:"Corrida", tipo:"run"}]);
+const tabs = document.getElementById("tabs");
+ABAS.forEach(a => {
+  const b = document.createElement("button");
+  b.type = "button"; b.role = "tab"; b.dataset.id = a.id; b.textContent = a.rot;
+  b.onclick = () => { ativo = a.id; render(); window.scrollTo(0,0); };
+  tabs.appendChild(b);
+});
+
+/* -------------------------------------------------------------- cronômetro */
+let tH = null;
+const timerEl = document.getElementById("timer");
+function contar(seg, rotulo){
+  clearInterval(tH);
+  let r = seg;
+  timerEl.className = "on";
+  const pinta = () => timerEl.textContent =
+    (rotulo ? rotulo + "  " : "") + Math.floor(r/60) + ":" + String(r%60).padStart(2,"0");
+  pinta();
+  tH = setInterval(() => {
+    r--;
+    if(r <= 0){
+      clearInterval(tH);
+      timerEl.className = "on zero";
+      timerEl.textContent = "concluído";
+      setTimeout(() => { timerEl.className = ""; }, 6000);
+    } else pinta();
+  }, 1000);
+}
+timerEl.onclick = () => { clearInterval(tH); timerEl.className = ""; };
+
+/* ------------------------------------------------------------ força: dados */
+function ultima(k){ const h = db.hist[k]; return (h && h.length) ? h[h.length-1] : null; }
+function salvar(k, sets){
+  const f = sets.filter(s => s.feito && s.kg !== "" && s.reps !== "");
+  if(!f.length) return;
+  db.hist[k] = db.hist[k] || [];
+  const reg = { data: hoje(), sets: f.map(s => ({kg:+s.kg, reps:+s.reps})) };
+  const u = db.hist[k][db.hist[k].length-1];
+  if(u && u.data === reg.data) db.hist[k][db.hist[k].length-1] = reg;
+  else db.hist[k].push(reg);
+  if(db.hist[k].length > 40) db.hist[k] = db.hist[k].slice(-40);
+  store.gravar(db);
+}
+
+function cartaoForca(e){
+  const div = document.createElement("div"); div.className = "item";
+  const head = document.createElement("button");
+  head.type = "button"; head.className = "head"; head.setAttribute("aria-expanded","false");
+  head.innerHTML = '<span class="glyph">' + svg(e.sim) + '</span>'
+    + '<span class="nm"><b></b><span></span></span><span class="tick"></span>';
+  head.onclick = () => {
+    const ab = !div.classList.contains("open");
+    div.classList.toggle("open", ab); head.setAttribute("aria-expanded", String(ab));
+  };
+  div.appendChild(head);
+
+  const body = document.createElement("div"); body.className = "body";
+  const swap = document.createElement("div"); swap.className = "swap";
+  const bp = document.createElement("button"), ba = document.createElement("button");
+  bp.type = ba.type = "button"; bp.textContent = "Principal"; ba.textContent = "Alternativo";
+  swap.append(bp, ba); body.appendChild(swap);
+
+  const nomeV = document.createElement("p"); nomeV.className = "vnome";
+  const exec = document.createElement("p"); exec.className = "exec";
+  const ref = document.createElement("a"); ref.className = "ref";
+  ref.target = "_blank"; ref.rel = "noopener"; ref.textContent = "ver demonstração em vídeo";
+  body.append(nomeV, exec, ref);
+
+  const tb = document.createElement("table");
+  tb.innerHTML = "<thead><tr><th>Série</th><th class='n'>kg</th><th class='n'>reps</th>"
+    + "<th class='n'>ok</th></tr></thead>";
+  const tbody = document.createElement("tbody"); tb.appendChild(tbody); body.appendChild(tb);
+  const last = document.createElement("p"); last.className = "last"; body.appendChild(last);
+  div.appendChild(body);
+
+  const vAtual = () => db.variante[e.id] === "a" ? "a" : "p";
+
+  function montar(){
+    const v = vAtual(), dado = e[v], k = chave(e.id, v);
+    bp.setAttribute("aria-pressed", String(v === "p"));
+    ba.setAttribute("aria-pressed", String(v === "a"));
+    head.querySelector(".nm b").textContent = dado.nome;
+    head.querySelector(".nm span").textContent =
+      e.series + " × " + e.reps + "  ·  " + e.carga + (v === "a" ? "  ·  alternativo" : "");
+    nomeV.textContent = dado.nome;
+    exec.innerHTML = dado.execucao.replace(
+      /(AMPLITUDE 0-45° APENAS|INTENÇÃO MÁXIMA DE VELOCIDADE|TRUQUE:|SEGURE)/g, "<strong>$1</strong>");
+    ref.href = dado.link;
+
+    if(!sessao[k]){
+      const u = ultima(k);
+      sessao[k] = Array.from({length:e.series}, (_,i) => ({
+        kg: u && u.sets[i] ? u.sets[i].kg : "", reps: u && u.sets[i] ? u.sets[i].reps : "",
+        feito:false, herdado: !!(u && u.sets[i])
+      }));
+    }
+    const sets = sessao[k];
+    tbody.innerHTML = "";
+    sets.forEach((s,i) => {
+      const tr = document.createElement("tr");
+      const td0 = document.createElement("td");
+      td0.className = "sn"; td0.textContent = String(i+1).padStart(2,"0"); tr.appendChild(td0);
+      ["kg","reps"].forEach(campo => {
+        const td = document.createElement("td"); td.className = "n";
+        const inp = document.createElement("input");
+        inp.type = "number"; inp.inputMode = "decimal";
+        inp.step = campo === "kg" ? "0.5" : "1"; inp.value = s[campo];
+        inp.setAttribute("aria-label", campo + " da série " + (i+1));
+        if(s.herdado && !s.feito) inp.classList.add("ghost");
+        inp.oninput = () => { s[campo] = inp.value; inp.classList.remove("ghost"); linha(); };
+        td.appendChild(inp); tr.appendChild(td);
+      });
+      const td3 = document.createElement("td"); td3.className = "n";
+      const bt = document.createElement("button");
+      bt.type = "button"; bt.className = "mark";
+      bt.setAttribute("aria-pressed", String(s.feito));
+      bt.setAttribute("aria-label", "Marcar série " + (i+1)); bt.textContent = "✓";
+      bt.onclick = () => {
+        s.feito = !s.feito; bt.setAttribute("aria-pressed", String(s.feito));
+        tr.querySelectorAll("input").forEach(x => x.classList.remove("ghost"));
+        if(s.feito){ salvar(k, sets); if(i < sets.length-1) contar(e.rest, "descanso"); }
+        marcar(); rodape();
+      };
+      td3.appendChild(bt); tr.appendChild(td3); tbody.appendChild(tr);
+    });
+
+    function linha(){
+      const u = ultima(k);
+      if(!u){ last.textContent = "primeira vez — registre para comparar depois"; return; }
+      const antes = u.sets.map(x => x.kg + "×" + x.reps).join("  ");
+      const ag = +sets[0].kg, an = u.sets[0].kg;
+      let d = "";
+      if(ag && an && ag !== an){
+        const dv = (ag - an).toFixed(1).replace(/\.0$/,"");
+        d = ' <span class="delta">' + (dv > 0 ? "+" : "") + dv + ' kg</span>';
+      }
+      last.innerHTML = "última vez (" + fmtData(u.data) + "):  " + antes + d;
+    }
+    function marcar(){
+      const n = sets.filter(x => x.feito).length;
+      const el = head.querySelector(".tick");
+      el.textContent = n ? n + "/" + sets.length : "";
+      el.classList.toggle("done", n === sets.length);
+    }
+    linha(); marcar();
+  }
+  bp.onclick = () => { db.variante[e.id] = "p"; store.gravar(db); montar(); rodape(); };
+  ba.onclick = () => { db.variante[e.id] = "a"; store.gravar(db); montar(); rodape(); };
+  montar();
+  return div;
+}
+
+/* --------------------------------------------------------------- mobilidade */
+function estadoMob(){
+  if(db.mob.data !== hoje()) db.mob.feitos = [];
+  return db.mob;
+}
+function rotinaAtual(){ return db.mob.rotina || "manha"; }
+
+function marcarMob(rid, idx, on){
+  const m = estadoMob();
+  m.data = hoje();
+  const k = rid + ":" + idx;
+  m.feitos = m.feitos || [];
+  if(on && !m.feitos.includes(k)) m.feitos.push(k);
+  if(!on) m.feitos = m.feitos.filter(x => x !== k);
+  const rot = ROTINAS.find(r => r.id === rid);
+  const completa = rot.itens.every((_,i) => m.feitos.includes(rid + ":" + i));
+  if(completa && m.ultimoCompleto !== hoje()){
+    const ontem = new Date(Date.now() - 864e5).toISOString().slice(0,10);
+    m.streak = (m.ultimoCompleto === ontem) ? (m.streak || 0) + 1 : 1;
+    m.ultimoCompleto = hoje();
+  }
+  store.gravar(db);
+}
+
+function abaMobilidade(){
+  const frag = document.createDocumentFragment();
+  const m = estadoMob();
+  const rid = rotinaAtual();
+  const rot = ROTINAS.find(r => r.id === rid);
+
+  const cab = document.createElement("div");
+  cab.style.cssText = "padding:20px 0 12px";
+  cab.innerHTML = '<div class="kicker">Mobilidade e alongamento</div>'
+    + '<div class="meta" style="margin-top:4px">'
+    + ROTINAS.map(r => r.nome + " " + r.min + " min").join("  ·  ") + '</div>';
+  frag.appendChild(cab);
+
+  const sel = document.createElement("div"); sel.className = "swap";
+  ROTINAS.forEach(r => {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = r.nome;
+    b.setAttribute("aria-pressed", String(r.id === rid));
+    b.onclick = () => { db.mob.rotina = r.id; store.gravar(db); render(); };
+    sel.appendChild(b);
+  });
+  frag.appendChild(sel);
+
+  const nota = document.createElement("div");
+  nota.className = "note"; nota.textContent = rot.nota;
+  frag.appendChild(nota);
+
+  const lista = document.createElement("div");
+  lista.style.marginTop = "14px";
+  rot.itens.forEach((it, i) => {
+    const k = rid + ":" + i;
+    const feito = (m.feitos || []).includes(k);
+    const div = document.createElement("div"); div.className = "item";
+
+    const head = document.createElement("button");
+    head.type = "button"; head.className = "head"; head.setAttribute("aria-expanded","false");
+    head.innerHTML = '<span class="glyph">' + svg(it.sim) + '</span>'
+      + '<span class="nm"><b>' + it.nome + '</b><span>' + it.dose + '</span></span>';
+    const bt = document.createElement("button");
+    bt.type = "button"; bt.className = "mark"; bt.textContent = "✓";
+    bt.setAttribute("aria-pressed", String(feito));
+    bt.setAttribute("aria-label", "Marcar " + it.nome);
+    bt.onclick = ev => {
+      ev.stopPropagation();
+      const on = bt.getAttribute("aria-pressed") !== "true";
+      bt.setAttribute("aria-pressed", String(on));
+      marcarMob(rid, i, on);
+      atualizaStreak();
+    };
+    head.onclick = () => {
+      const ab = !div.classList.contains("open");
+      div.classList.toggle("open", ab); head.setAttribute("aria-expanded", String(ab));
+    };
+    const linha = document.createElement("div");
+    linha.style.cssText = "display:flex;align-items:center;gap:12px";
+    linha.append(head, bt);
+    div.appendChild(linha);
+
+    const body = document.createElement("div"); body.className = "body";
+    const p = document.createElement("p"); p.className = "exec";
+    p.innerHTML = it.execucao.replace(/(SEGURE|POR TRÁS)/g, "<strong>$1</strong>");
+    body.appendChild(p);
+    if(it.link){
+      const a = document.createElement("a");
+      a.className = "ref"; a.href = it.link; a.target = "_blank"; a.rel = "noopener";
+      a.textContent = "ver demonstração em vídeo";
+      body.appendChild(a);
+    }
+    const tb = document.createElement("button");
+    tb.type = "button"; tb.className = "timerbtn";
+    tb.textContent = "iniciar " + it.seg + " s";
+    tb.onclick = () => contar(it.seg, it.nome.split(" ")[0].toLowerCase());
+    body.appendChild(tb);
+    div.appendChild(body);
+    lista.appendChild(div);
+  });
+  frag.appendChild(lista);
+
+  const st = document.createElement("div"); st.className = "streak"; st.id = "streak";
+  frag.appendChild(st);
+  return frag;
+}
+
+function atualizaStreak(){
+  const el = document.getElementById("streak");
+  if(!el) return;
+  const m = db.mob, rid = rotinaAtual();
+  const rot = ROTINAS.find(r => r.id === rid);
+  const n = (m.feitos || []).filter(x => x.indexOf(rid + ":") === 0).length;
+  const s = m.streak || 0;
+  el.textContent = n + " de " + rot.itens.length + " itens hoje"
+    + (s ? "  ·  " + s + (s === 1 ? " dia seguido" : " dias seguidos") : "");
+  rodape();
+}
+
+/* ------------------------------------------------------------------ corrida */
+function abaCorrida(){
+  const frag = document.createDocumentFragment();
+  const sem = Math.min(Math.max(db.run.semana || 1, 1), CORRIDA.semanas.length);
+  const atual = CORRIDA.semanas[sem-1];
+
+  const cab = document.createElement("div");
+  cab.style.cssText = "padding:20px 0 12px";
+  cab.innerHTML = '<div class="kicker">Retorno à corrida</div>'
+    + '<div class="meta" style="margin-top:4px">Semana ' + sem + ' de '
+    + CORRIDA.semanas.length + '  ·  ' + atual.foco + '</div>';
+  frag.appendChild(cab);
+
+  ["dias","cadencia","ritmo","nota_forca"].forEach(k => {
+    const n = document.createElement("div");
+    n.className = "note"; n.textContent = CORRIDA[k];
+    frag.appendChild(n);
+  });
+
+  const ss = document.createElement("div"); ss.style.marginTop = "20px";
+  ss.innerHTML = '<div class="kicker" style="padding-bottom:8px">Sessões desta semana</div>';
+  [["Sexta · curta", atual.sexta, atual.fmin], ["Domingo · principal", atual.domingo, atual.dmin]]
+    .forEach(([rot, txt, min]) => {
+      const w = document.createElement("div"); w.className = "wk atual";
+      w.innerHTML = '<span class="wknum">' + min + "'" + '</span>'
+        + '<span class="wkinfo"><b>' + rot + '</b><span class="wkl">' + txt + '</span></span>';
+      ss.appendChild(w);
+    });
+  frag.appendChild(ss);
+
+  /* registro pós-corrida */
+  const reg = document.createElement("div"); reg.style.marginTop = "22px";
+  reg.innerHTML = '<div class="kicker" style="padding-bottom:10px">Registrar corrida</div>';
+  const tb = document.createElement("table");
+  tb.innerHTML = "<thead><tr><th>Campo</th><th class='n'>valor</th></tr></thead>";
+  const tbody = document.createElement("tbody");
+  const campos = [["km","distância (km)","0.1"], ["min","tempo (min)","1"],
+                  ["cad","cadência (ppm)","1"], ["dor","joelho 0-10","1"]];
+  const vals = {};
+  campos.forEach(([id, rot, step]) => {
+    const tr = document.createElement("tr");
+    const td0 = document.createElement("td"); td0.textContent = rot; td0.style.fontSize = "13px";
+    const td1 = document.createElement("td"); td1.className = "n";
+    const inp = document.createElement("input");
+    inp.type = "number"; inp.inputMode = "decimal"; inp.step = step;
+    inp.setAttribute("aria-label", rot);
+    if(id === "dor"){ inp.min = "0"; inp.max = "10"; }
+    inp.oninput = () => { vals[id] = inp.value; pace(); };
+    vals[id] = "";
+    td1.appendChild(inp); tr.append(td0, td1); tbody.appendChild(tr);
+  });
+  tb.appendChild(tbody); reg.appendChild(tb);
+
+  const pc = document.createElement("p"); pc.className = "last";
+  pc.textContent = "pace calculado: —";
+  reg.appendChild(pc);
+  const p2 = (mn,km) => mn / km;
+  function pace(){
+    const km = parseFloat(vals.km), mn = parseFloat(vals.min);
+    if(km > 0 && mn > 0){
+      let m = Math.floor(p2(mn,km)), s = Math.round((p2(mn,km) - m) * 60);
+      if(s === 60){ m += 1; s = 0; }
+      pc.textContent = "pace calculado: " + m + ":" + String(s).padStart(2,"0") + " /km";
+    } else pc.textContent = "pace calculado: —";
+  }
+
+  const acts = document.createElement("div"); acts.className = "actions";
+  const bsave = document.createElement("button");
+  bsave.className = "btn solid"; bsave.textContent = "Salvar corrida";
+  bsave.onclick = () => {
+    const km = parseFloat(vals.km), mn = parseFloat(vals.min);
+    if(!(km > 0 && mn > 0)){ alert("Preencha distância e tempo."); return; }
+    db.run.log.push({data:hoje(), semana:sem, km:km, min:mn,
+                     cad: vals.cad ? +vals.cad : null, dor: vals.dor !== "" ? +vals.dor : null});
+    if(db.run.log.length > 200) db.run.log = db.run.log.slice(-200);
+    store.gravar(db); render();
+  };
+  acts.appendChild(bsave); reg.appendChild(acts);
+  frag.appendChild(reg);
+
+  /* aviso do teto de 110% */
+  const longa = maiorRecente();
+  if(longa){
+    const av = document.createElement("div"); av.className = "note";
+    av.textContent = "Sua corrida mais longa dos últimos 30 dias foi " + longa.toFixed(1)
+      + " km. O teto desta sessão é " + (longa * 1.1).toFixed(1) + " km.";
+    frag.appendChild(av);
+  }
+
+  /* critérios */
+  const cr = document.createElement("div"); cr.style.marginTop = "22px";
+  cr.innerHTML = '<div class="kicker" style="padding-bottom:10px">Progredir, repetir ou recuar</div>';
+  CORRIDA.criterios.forEach(([t, d]) => {
+    const el = document.createElement("div"); el.className = "crit";
+    el.innerHTML = "<b>" + t + "</b><span>" + d + "</span>";
+    cr.appendChild(el);
+  });
+  const nav2 = document.createElement("div"); nav2.className = "actions";
+  const bv = document.createElement("button");
+  bv.className = "btn"; bv.textContent = "← Recuar";
+  bv.onclick = () => { db.run.semana = Math.max(1, sem-1); store.gravar(db); render(); };
+  const bn = document.createElement("button");
+  bn.className = "btn"; bn.textContent = "Avançar →";
+  bn.onclick = () => { db.run.semana = Math.min(CORRIDA.semanas.length, sem+1); store.gravar(db); render(); };
+  nav2.append(bv, bn); cr.appendChild(nav2);
+  frag.appendChild(cr);
+
+  /* plano completo */
+  const pl = document.createElement("div"); pl.style.marginTop = "26px";
+  pl.innerHTML = '<div class="kicker" style="padding-bottom:8px">Plano completo</div>';
+  CORRIDA.semanas.forEach(s => {
+    const w = document.createElement("div");
+    w.className = "wk" + (s.n === sem ? " atual" : "");
+    w.innerHTML = '<span class="wknum">' + s.n + '</span>'
+      + '<span class="wkinfo"><b>' + s.foco + '</b>'
+      + '<span class="wkl">sex · ' + s.sexta + '</span>'
+      + '<span class="wkl">dom · ' + s.domingo + '</span></span>';
+    pl.appendChild(w);
+  });
+  frag.appendChild(pl);
+
+  /* histórico */
+  if(db.run.log.length){
+    const h = document.createElement("div"); h.style.marginTop = "26px";
+    h.innerHTML = '<div class="kicker" style="padding-bottom:8px">Últimas corridas</div>';
+    db.run.log.slice(-6).reverse().forEach(r => {
+      const p = r.min / r.km; let mm = Math.floor(p), sc = Math.round((p-mm)*60);
+      if(sc === 60){ mm += 1; sc = 0; }
+      const el = document.createElement("div"); el.className = "wk";
+      el.innerHTML = '<span class="wknum">' + r.km.toFixed(1) + '</span>'
+        + '<span class="wkinfo"><b>' + fmtData(r.data) + '  ·  semana ' + r.semana + '</b>'
+        + '<span class="wkl">' + r.min + ' min  ·  ' + mm + ':' + String(sc).padStart(2,"0") + ' /km'
+        + (r.cad ? '  ·  ' + r.cad + ' ppm' : '')
+        + (r.dor !== null && r.dor !== undefined ? '  ·  joelho ' + r.dor + '/10' : '')
+        + '</span></span>';
+      h.appendChild(el);
+    });
+    frag.appendChild(h);
+  }
+  return frag;
+}
+
+function maiorRecente(){
+  const lim = new Date(Date.now() - 30*864e5).toISOString().slice(0,10);
+  const rs = db.run.log.filter(r => r.data >= lim);
+  return rs.length ? Math.max.apply(null, rs.map(r => r.km)) : null;
+}
+
+/* ------------------------------------------------------------------ render */
+function render(){
+  [...tabs.children].forEach(b => b.setAttribute("aria-selected", b.dataset.id === ativo));
+  const lista = document.getElementById("lista");
+  lista.innerHTML = "";
+  const aba = ABAS.find(a => a.id === ativo);
+
+  if(aba.tipo === "forca"){
+    const t = TREINOS.find(x => x.id === ativo);
+    const total = t.ex.reduce((a,e) => a + e.series, 0);
+    const cab = document.createElement("div");
+    cab.style.cssText = "padding:20px 0 6px";
+    cab.innerHTML = '<div class="kicker">' + t.foco + '</div>'
+      + '<div class="meta" style="margin-top:4px">' + t.ex.length + ' exercícios · '
+      + total + ' séries</div>';
+    lista.appendChild(cab);
+    t.ex.forEach(e => lista.appendChild(cartaoForca(e)));
+  } else if(aba.tipo === "mob"){
+    lista.appendChild(abaMobilidade());
+    atualizaStreak();
+  } else {
+    lista.appendChild(abaCorrida());
+  }
+  if(!store.persistente){
+    const av = document.createElement("div");
+    av.className = "note";
+    av.textContent = "Este navegador está bloqueando o armazenamento local, então o histórico "
+      + "vale só enquanto a aba estiver aberta. Baixe o arquivo e abra direto no celular para "
+      + "que os registros fiquem salvos.";
+    lista.appendChild(av);
+  }
+  rodape();
+}
+
+function rodape(){
+  const el = document.getElementById("stat");
+  const aba = ABAS.find(a => a.id === ativo);
+  if(aba.tipo === "forca"){
+    const t = TREINOS.find(x => x.id === ativo);
+    const total = t.ex.reduce((a,e) => a + e.series, 0);
+    const feitas = t.ex.reduce((a,e) => {
+      const k = chave(e.id, db.variante[e.id] === "a" ? "a" : "p");
+      return a + (sessao[k] || []).filter(s => s.feito).length;
+    }, 0);
+    el.textContent = feitas + " de " + total + " séries registradas hoje no " + t.nome + ".";
+  } else if(aba.tipo === "mob"){
+    const rot = ROTINAS.find(r => r.id === rotinaAtual());
+    el.textContent = "Rotina " + rot.nome.toLowerCase() + " — cerca de " + rot.min + " minutos.";
+  } else {
+    el.textContent = db.run.log.length + " corrida(s) registrada(s).";
+  }
+}
+
+/* --------------------------------------------------------------- exportação */
+document.getElementById("exportar").onclick = () => {
+  const nomes = {};
+  TREINOS.forEach(t => t.ex.forEach(e => {
+    nomes[chave(e.id,"p")] = e.p.nome; nomes[chave(e.id,"a")] = e.a.nome;
+  }));
+  const L = ["tipo,data,item,serie,valor1,valor2,extra"];
+  Object.keys(db.hist).forEach(k => db.hist[k].forEach(r =>
+    r.sets.forEach((s,i) =>
+      L.push(["forca", r.data, '"' + (nomes[k] || k) + '"', i+1, s.kg, s.reps, ""].join(",")))));
+  db.run.log.forEach(r => L.push(["corrida", r.data, '"semana ' + r.semana + '"', "",
+    r.km, r.min, (r.cad || "") + "|" + (r.dor === null || r.dor === undefined ? "" : r.dor)].join(",")));
+  const blob = new Blob([L.join("\n")], {type:"text/csv;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "historico-treino.csv"; a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+document.getElementById("limpar").onclick = () => {
+  if(!confirm("Apagar todo o histórico? Isso não tem volta.")) return;
+  db = { hist:{}, variante:{}, mob:{}, run:{semana:1, log:[]} };
+  Object.keys(sessao).forEach(k => delete sessao[k]);
+  store.gravar(db); render();
+};
+
+render();
+</script>
+</body>
+</html>
